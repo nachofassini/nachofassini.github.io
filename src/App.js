@@ -10,19 +10,28 @@ import {
   FavoriteBorder,
   Favorite,
 } from "@mui/icons-material";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@mui/material";
 
 const initialDate = Date.parse("oct 21, 2021 14:25:00");
 const returnDate = Date.parse("nov 12, 2021 09:30:00");
-const now = new Date();
-
-const travel = returnDate - initialDate;
-const left = returnDate - now;
-const completed = 100 - (left * 100) / travel;
+const travelDuration = returnDate - initialDate;
 
 function App() {
   const [showCounter, setShowCounter] = useState(false);
+  const [completed, setCompleted] = useState(0);
+
+  const updateCompleted = useCallback(() => {
+    const now = new Date();
+    const left = returnDate - now;
+    setCompleted(100 - (left * 100) / travelDuration);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(updateCompleted, 1000);
+    return () => clearInterval(interval);
+  }, [updateCompleted]);
+
   return (
     <div className="App">
       {!showCounter ? (
@@ -48,6 +57,7 @@ function App() {
               width: "100%",
               mb: 10,
               alignItems: "center",
+              px: 2,
             }}
           >
             <FavoriteBorder sx={{ fontSize: 20 }} />
@@ -55,7 +65,15 @@ function App() {
             <ProgressBar
               animated
               now={completed}
-              style={{ width: "100%", margin: "0 30px" }}
+              label={`${completed.toFixed(4)}%`}
+              style={{
+                width: "100%",
+                margin: "0 20px",
+                fontWeight: 600,
+                backgroundColor: "transparent",
+                border: "1px solid gray",
+              }}
+              variant="info"
             />
             <SentimentVerySatisfied sx={{ fontSize: 20 }} />
             <Favorite sx={{ fontSize: 20, color: "red" }} />
